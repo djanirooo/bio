@@ -103,7 +103,7 @@ body::before {
 /* Container */
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 0 1.25rem;
   position: relative;
@@ -119,7 +119,7 @@ body::before {
 }
 
 .nav-glass {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--border-light);
@@ -160,7 +160,7 @@ body::before {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 12%;
   border: 2px solid #ffffff;
 }
 
@@ -182,7 +182,7 @@ body::before {
 .nav-menu-links {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
@@ -193,9 +193,9 @@ body::before {
 .nav-menu-links a {
   color: var(--text-muted);
   text-decoration: none;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 700;
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.75rem;
   border-radius: var(--radius-full);
   white-space: nowrap;
   transition: var(--transition);
@@ -203,8 +203,8 @@ body::before {
 
 .nav-menu-links a:hover,
 .nav-menu-links a.active {
-  color: var(--tech-blue-primary);
-  background: rgba(2, 132, 199, 0.08);
+  color: var(--tech-blue-royal);
+  background: rgba(37, 99, 235, 0.08);
 }
 
 /* ===================================================================
@@ -233,7 +233,7 @@ body::before {
   background: var(--gradient-tech-blue);
 }
 
-/* Perfectly Centered Avatar (Adjusted crop to clearly show face) */
+/* Perfectly Centered Avatar */
 .hero-avatar {
   position: relative;
   width: 155px;
@@ -573,6 +573,92 @@ body::before {
 }
 
 /* ===================================================================
+   EXPANDED COURSES SHOWCASE GRID (دليل الدورات التدريبية المتاح)
+=================================================================== */
+.courses-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.35rem;
+}
+
+.course-card {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.6rem 1.45rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition);
+  position: relative;
+}
+
+.course-card:hover {
+  border-color: var(--tech-blue-royal);
+  background: #ffffff;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.course-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.25rem 0.8rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.85rem;
+  width: fit-content;
+}
+
+.badge-student { background: rgba(37, 99, 235, 0.08); color: var(--tech-blue-royal); border: 1px solid rgba(37, 99, 235, 0.2); }
+.badge-admin { background: rgba(16, 185, 129, 0.08); color: #16a34a; border: 1px solid rgba(16, 185, 129, 0.2); }
+.badge-creator { background: rgba(220, 38, 38, 0.08); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+.badge-tech { background: rgba(14, 165, 233, 0.08); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.2); }
+.badge-custom { background: rgba(245, 158, 11, 0.08); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+
+.course-title-text {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--text-title);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.course-summary-text {
+  font-size: 0.9rem;
+  color: var(--text-body);
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+}
+
+.course-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: var(--radius-full);
+  background: var(--tech-blue-royal);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: var(--transition);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+.course-action-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+/* ===================================================================
    SKILL PROGRESS BARS (Animated On Scroll)
 =================================================================== */
 .skills-bars-grid {
@@ -801,7 +887,7 @@ body::before {
 }
 
 /* ===================================================================
-   CONTACT & DUAL WHATSAPP CHANNELS
+   CONTACT & DUAL WHATSAPP CHANNELS (With New Number 0656663418 for Institutions)
 =================================================================== */
 .whatsapp-channels-grid {
   display: grid;

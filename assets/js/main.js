@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollProgressBar();
   initScrollSpy();
   initScrollAnimations();
-  initFormTriggers();
+  initCourseOrderTriggers();
 });
 
 /* ===================================================================
@@ -36,7 +36,7 @@ function initScrollAnimations() {
       if (entry.isIntersecting) {
         entry.target.classList.add('is-visible');
 
-        // If this element contains skill fills, animate them
+        // Animate skill progress bars if inside this section
         const skillFills = entry.target.querySelectorAll('.skill-fill');
         skillFills.forEach(fill => {
           const targetWidth = fill.getAttribute('data-width');
@@ -49,7 +49,7 @@ function initScrollAnimations() {
       }
     });
   }, {
-    threshold: 0.12,
+    threshold: 0.1,
     rootMargin: '0px 0px -40px 0px'
   });
 
@@ -87,37 +87,42 @@ function initScrollSpy() {
 }
 
 /* ===================================================================
-   4. Quick Selection Triggers
+   4. Course Order Click Handler
 =================================================================== */
-function initFormTriggers() {
-  const triggers = document.querySelectorAll('[data-target-purpose]');
-  triggers.forEach(btn => {
+function initCourseOrderTriggers() {
+  const courseButtons = document.querySelectorAll('[data-course]');
+  courseButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const purpose = btn.getAttribute('data-target-purpose');
-      const details = btn.getAttribute('data-target-details') || '';
+      const courseName = btn.getAttribute('data-course');
 
       const purposeSelect = document.getElementById('form-purpose');
       if (purposeSelect) {
-        purposeSelect.value = purpose;
+        purposeSelect.value = 'طالب تكوين: تسجيل في دورة تدريبية';
       }
 
       const detailsInput = document.getElementById('form-details');
-      if (detailsInput && details) {
-        detailsInput.value = details;
-        detailsInput.focus();
+      if (detailsInput) {
+        detailsInput.value = `طلب التسجيل في: ${courseName}`;
       }
 
+      const nameInput = document.getElementById('form-name');
       const contactSection = document.getElementById('contact');
       if (contactSection) {
         contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+
+      setTimeout(() => {
+        if (nameInput) nameInput.focus();
+      }, 500);
+
+      showNotice(`تم اختيار: ${courseName} - املأ اسمك ورقمك لإرسال الطلب`);
     });
   });
 }
 
 /* ===================================================================
-   5. Frictionless Dispatch (WhatsApp & Email)
+   5. Frictionless Dispatch (Dual Numbers Routing)
 =================================================================== */
 window.sendViaWhatsApp = function(event) {
   if (event) event.preventDefault();
@@ -128,9 +133,15 @@ window.sendViaWhatsApp = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showNotice('يرجى ملء الاسم ورقم الهاتف أولاً');
+    showNotice('يرجى كتابة الاسم ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
+  }
+
+  // Routing: If institutional / academy contract, route to 0656663418; otherwise 0796593630
+  let targetWaNumber = '213796593630'; // Students & trainees hotline
+  if (purpose.includes('مؤسسة تكوينية') || purpose.includes('OHB')) {
+    targetWaNumber = '213656663418'; // Institutions hotline
   }
 
   const messageText = 
@@ -139,11 +150,11 @@ window.sendViaWhatsApp = function(event) {
 رقم الهاتف: ${phone}
 نوع الطلب: ${purpose}
 ------------------------
-تفاصيل الرسالة:
-${details || 'أود التواصل والتنسيق معكم بخصوص التكوين / الشراكة.'}`;
+تفاصيل الطلب:
+${details || 'أود الاستفسار والتسجيل في التكوين / طلب شراكة.'}`;
 
   const encoded = encodeURIComponent(messageText);
-  const waUrl = `https://wa.me/213796593630?text=${encoded}`;
+  const waUrl = `https://wa.me/${targetWaNumber}?text=${encoded}`;
   
   showNotice('جاري فتح واتساب لإرسال رسالتك...');
   window.open(waUrl, '_blank');
@@ -158,7 +169,7 @@ window.sendViaEmail = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showNotice('يرجى ملء الاسم ورقم الهاتف أولاً');
+    showNotice('يرجى كتابة الاسم ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
   }
@@ -192,7 +203,7 @@ function showNotice(text) {
     document.body.appendChild(toast);
   }
 
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #38bdf8;"></i> <span>${text}</span>`;
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #2563eb;"></i> <span>${text}</span>`;
   toast.classList.add('show');
 
   clearTimeout(toastTimer);
