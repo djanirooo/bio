@@ -1,13 +1,12 @@
 /**
- * الأستاذ مشماش عبدالرزاق - Portfolio & Academy Lead Generator
- * High Performance Vanilla JS
+ * الأستاذ مشماش عبدالرزاق - أستاذ متخصص في الإعلام الآلي درجة 1
+ * One-Page Technical Portfolio Controller
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   initScrollProgressBar();
-  initTabs();
-  initHashRouting();
-  initCourseSelectButtons();
+  initScrollSpy();
+  initFormTriggers();
 });
 
 /* ===================================================================
@@ -26,101 +25,67 @@ function initScrollProgressBar() {
 }
 
 /* ===================================================================
-   2. Interactive Tab Switching
+   2. Scroll Spy (Highlight Active Nav Link)
 =================================================================== */
-function initTabs() {
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-content-panel');
+function initScrollSpy() {
+  const sections = document.querySelectorAll('section[id], div[id].section-block');
+  const navLinks = document.querySelectorAll('.nav-menu-links a');
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetId = button.getAttribute('data-tab');
-      activateTab(targetId);
-      
-      if (history.pushState) {
-        history.pushState(null, null, `#${targetId}`);
+  if (!sections.length || !navLinks.length) return;
+
+  window.addEventListener('scroll', () => {
+    let currentId = '';
+    const scrollPosition = window.scrollY + 120;
+
+    sections.forEach(sec => {
+      const top = sec.offsetTop;
+      const height = sec.offsetHeight;
+      if (scrollPosition >= top && scrollPosition < top + height) {
+        currentId = sec.getAttribute('id');
       }
     });
-  });
-}
 
-function activateTab(tabId) {
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-content-panel');
-
-  let targetFound = false;
-  tabPanels.forEach(panel => {
-    if (panel.id === tabId) {
-      panel.classList.add('active');
-      targetFound = true;
-    } else {
-      panel.classList.remove('active');
-    }
-  });
-
-  if (!targetFound) return;
-
-  tabButtons.forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-  });
-
-  // Smooth scroll to tabs if viewport is past them
-  const tabsNav = document.querySelector('.portfolio-tabs-nav');
-  if (tabsNav) {
-    const rect = tabsNav.getBoundingClientRect();
-    if (rect.top < 0) {
-      tabsNav.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${currentId}`) {
+        link.classList.add('active');
+      }
+    });
+  }, { passive: true });
 }
 
 /* ===================================================================
-   3. URL Hash Navigation
+   3. Quick Selection Triggers
 =================================================================== */
-function initHashRouting() {
-  const hash = window.location.hash.replace('#', '');
-  if (hash && document.getElementById(hash)) {
-    activateTab(hash);
-  }
-}
-
-/* ===================================================================
-   4. Connect Course & Academy Buttons to Form
-=================================================================== */
-function initCourseSelectButtons() {
-  const selectTriggers = document.querySelectorAll('[data-select-course]');
-  selectTriggers.forEach(btn => {
+function initFormTriggers() {
+  const triggers = document.querySelectorAll('[data-target-purpose]');
+  triggers.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const courseName = btn.getAttribute('data-select-course');
-      const targetPurpose = btn.getAttribute('data-purpose') || 'دورة تدريبية';
+      const purpose = btn.getAttribute('data-target-purpose');
+      const details = btn.getAttribute('data-target-details') || '';
 
-      activateTab('contact');
-
-      // Set purpose
       const purposeSelect = document.getElementById('form-purpose');
       if (purposeSelect) {
-        purposeSelect.value = targetPurpose;
+        purposeSelect.value = purpose;
       }
 
-      // Prepopulate message
-      const msgArea = document.getElementById('form-details');
-      if (msgArea) {
-        msgArea.value = `أرغب في الاستفسار والتسجيل بخصوص: ${courseName}`;
-        msgArea.focus();
+      const detailsInput = document.getElementById('form-details');
+      if (detailsInput && details) {
+        detailsInput.value = details;
+        detailsInput.focus();
       }
 
-      // Scroll to form smoothly
-      const formEl = document.getElementById('contact-form-card');
-      if (formEl) {
-        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
   });
 }
 
 /* ===================================================================
-   5. Frictionless Message Dispatch (WhatsApp & Email)
+   4. Frictionless Dispatch (WhatsApp & Email)
 =================================================================== */
 window.sendViaWhatsApp = function(event) {
   if (event) event.preventDefault();
@@ -131,24 +96,24 @@ window.sendViaWhatsApp = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showToast('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    showNotice('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
   }
 
   const messageText = 
 `السلام عليكم أستاذ عبدالرزاق،
-أنا: ${name}
+الاسم / المؤسسة: ${name}
 رقم الهاتف: ${phone}
 نوع الطلب: ${purpose}
 ------------------------
 تفاصيل الرسالة:
-${details || 'أود الاستفسار والتواصل معكم مباشرة بخصوص التكوين/الشراكة.'}`;
+${details || 'أود التواصل والتنسيق معكم بخصوص التكوين / الشراكة.'}`;
 
   const encoded = encodeURIComponent(messageText);
   const waUrl = `https://wa.me/213796593630?text=${encoded}`;
   
-  showToast('جاري فتح واتساب لإرسال رسالتك...');
+  showNotice('جاري فتح واتساب لإرسال رسالتك...');
   window.open(waUrl, '_blank');
 };
 
@@ -161,12 +126,12 @@ window.sendViaEmail = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showToast('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    showNotice('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
   }
 
-  const subject = encodeURIComponent(`[طلب موقع Portfolio]: ${purpose} - ${name}`);
+  const subject = encodeURIComponent(`[طلب تواصل]: ${purpose} - ${name}`);
   const body = encodeURIComponent(
 `الاسم الكامل: ${name}
 رقم الهاتف: ${phone}
@@ -178,24 +143,24 @@ ${details}
   );
 
   const mailUrl = `mailto:profinfo101@gmail.com?subject=${subject}&body=${body}`;
-  showToast('جاري فتح البريد الإلكتروني...');
+  showNotice('جاري فتح تطبيق البريد...');
   window.location.href = mailUrl;
 };
 
 /* ===================================================================
-   6. Toast Notification
+   5. Toast Notice
 =================================================================== */
 let toastTimer;
-function showToast(text) {
-  let toast = document.getElementById('portfolio-toast');
+function showNotice(text) {
+  let toast = document.getElementById('portfolio-notice');
   if (!toast) {
     toast = document.createElement('div');
-    toast.id = 'portfolio-toast';
-    toast.className = 'toast-msg';
+    toast.id = 'portfolio-notice';
+    toast.className = 'toast-notice';
     document.body.appendChild(toast);
   }
 
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--cyan-neon);"></i> <span>${text}</span>`;
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--cyan-tech);"></i> <span>${text}</span>`;
   toast.classList.add('show');
 
   clearTimeout(toastTimer);
