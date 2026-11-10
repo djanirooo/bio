@@ -1,11 +1,12 @@
 /**
- * الأستاذ مشماش عبدالرزاق - أستاذ متخصص في الإعلام الآلي درجة 1
- * One-Page Technical Portfolio Controller
+ * الأستاذ مشماش عبدالرزاق - أستاذ متخصص في الإعلام الآلي درجة 1 (PSEP 1)
+ * White & Tech Blue Portfolio Controller
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   initScrollProgressBar();
   initScrollSpy();
+  initScrollAnimations();
   initFormTriggers();
 });
 
@@ -25,7 +26,38 @@ function initScrollProgressBar() {
 }
 
 /* ===================================================================
-   2. Scroll Spy (Highlight Active Nav Link)
+   2. Scroll Reveal & Skill Bars Animation
+=================================================================== */
+function initScrollAnimations() {
+  const revealElements = document.querySelectorAll('.reveal-on-scroll');
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+
+        // If this element contains skill fills, animate them
+        const skillFills = entry.target.querySelectorAll('.skill-fill');
+        skillFills.forEach(fill => {
+          const targetWidth = fill.getAttribute('data-width');
+          if (targetWidth) {
+            fill.style.width = targetWidth;
+          }
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.12,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  revealElements.forEach(el => revealObserver.observe(el));
+}
+
+/* ===================================================================
+   3. Scroll Spy (Highlight Active Nav Link)
 =================================================================== */
 function initScrollSpy() {
   const sections = document.querySelectorAll('section[id], div[id].section-block');
@@ -35,7 +67,7 @@ function initScrollSpy() {
 
   window.addEventListener('scroll', () => {
     let currentId = '';
-    const scrollPosition = window.scrollY + 120;
+    const scrollPosition = window.scrollY + 140;
 
     sections.forEach(sec => {
       const top = sec.offsetTop;
@@ -55,7 +87,7 @@ function initScrollSpy() {
 }
 
 /* ===================================================================
-   3. Quick Selection Triggers
+   4. Quick Selection Triggers
 =================================================================== */
 function initFormTriggers() {
   const triggers = document.querySelectorAll('[data-target-purpose]');
@@ -85,7 +117,7 @@ function initFormTriggers() {
 }
 
 /* ===================================================================
-   4. Frictionless Dispatch (WhatsApp & Email)
+   5. Frictionless Dispatch (WhatsApp & Email)
 =================================================================== */
 window.sendViaWhatsApp = function(event) {
   if (event) event.preventDefault();
@@ -96,7 +128,7 @@ window.sendViaWhatsApp = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showNotice('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    showNotice('يرجى ملء الاسم ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
   }
@@ -126,7 +158,7 @@ window.sendViaEmail = function(event) {
   const details = document.getElementById('form-details').value.trim();
 
   if (!name || !phone) {
-    showNotice('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    showNotice('يرجى ملء الاسم ورقم الهاتف أولاً');
     document.getElementById('form-name').focus();
     return;
   }
@@ -148,7 +180,7 @@ ${details}
 };
 
 /* ===================================================================
-   5. Toast Notice
+   6. Toast Notice
 =================================================================== */
 let toastTimer;
 function showNotice(text) {
@@ -160,7 +192,7 @@ function showNotice(text) {
     document.body.appendChild(toast);
   }
 
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--cyan-tech);"></i> <span>${text}</span>`;
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: #38bdf8;"></i> <span>${text}</span>`;
   toast.classList.add('show');
 
   clearTimeout(toastTimer);
