@@ -1,47 +1,28 @@
 /**
- * مشماش عبدالرزاق - Bio & Portfolio Interactive Controller
- * Cloudflare Pages Optimized
+ * الأستاذ مشماش عبدالرزاق - Portfolio & Academy Lead Generator
+ * High Performance Vanilla JS
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
+  initScrollProgressBar();
   initTabs();
-  initModals();
-  initCopyButtons();
-  initHashNavigation();
+  initHashRouting();
+  initCourseSelectButtons();
 });
 
 /* ===================================================================
-   1. Theme Management (Dark / Light Mode)
+   1. Real-time Scroll Progress Bar
 =================================================================== */
-function initTheme() {
-  const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
-  const currentTheme = localStorage.getItem('theme') || 'dark';
+function initScrollProgressBar() {
+  const progressBar = document.getElementById('scroll-progress-bar');
+  if (!progressBar) return;
 
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  updateThemeIcon(currentTheme, themeIcon);
-
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const activeTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
-      
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateThemeIcon(newTheme, themeIcon);
-      showToast(newTheme === 'dark' ? 'تم تفعيل الوضع المظلم' : 'تم تفعيل الوضع الفاتح');
-    });
-  }
-}
-
-function updateThemeIcon(theme, icon) {
-  if (!icon) return;
-  if (theme === 'dark') {
-    icon.className = 'fas fa-sun';
-  } else {
-    icon.className = 'fas fa-moon';
-  }
+  window.addEventListener('scroll', () => {
+    const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + '%';
+  }, { passive: true });
 }
 
 /* ===================================================================
@@ -49,14 +30,13 @@ function updateThemeIcon(theme, icon) {
 =================================================================== */
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
+  const tabPanels = document.querySelectorAll('.tab-content-panel');
 
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
       const targetId = button.getAttribute('data-tab');
       activateTab(targetId);
       
-      // Update browser hash without jump
       if (history.pushState) {
         history.pushState(null, null, `#${targetId}`);
       }
@@ -66,23 +46,30 @@ function initTabs() {
 
 function activateTab(tabId) {
   const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
+  const tabPanels = document.querySelectorAll('.tab-content-panel');
+
+  let targetFound = false;
+  tabPanels.forEach(panel => {
+    if (panel.id === tabId) {
+      panel.classList.add('active');
+      targetFound = true;
+    } else {
+      panel.classList.remove('active');
+    }
+  });
+
+  if (!targetFound) return;
 
   tabButtons.forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
   });
 
-  tabPanels.forEach(panel => {
-    const isActive = panel.id === tabId;
-    panel.classList.toggle('active', isActive);
-  });
-
-  // Scroll smoothly to the tabs area if viewport is low
-  const tabsWrapper = document.querySelector('.tabs-wrapper');
-  if (tabsWrapper) {
-    const rect = tabsWrapper.getBoundingClientRect();
+  // Smooth scroll to tabs if viewport is past them
+  const tabsNav = document.querySelector('.portfolio-tabs-nav');
+  if (tabsNav) {
+    const rect = tabsNav.getBoundingClientRect();
     if (rect.top < 0) {
-      tabsWrapper.scrollIntoView({ behavior: 'smooth' });
+      tabsNav.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 }
@@ -90,7 +77,7 @@ function activateTab(tabId) {
 /* ===================================================================
    3. URL Hash Navigation
 =================================================================== */
-function initHashNavigation() {
+function initHashRouting() {
   const hash = window.location.hash.replace('#', '');
   if (hash && document.getElementById(hash)) {
     activateTab(hash);
@@ -98,94 +85,121 @@ function initHashNavigation() {
 }
 
 /* ===================================================================
-   4. Copy to Clipboard
+   4. Connect Course & Academy Buttons to Form
 =================================================================== */
-function initCopyButtons() {
-  const copyButtons = document.querySelectorAll('[data-copy]');
-  copyButtons.forEach(btn => {
+function initCourseSelectButtons() {
+  const selectTriggers = document.querySelectorAll('[data-select-course]');
+  selectTriggers.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const text = btn.getAttribute('data-copy');
-      const label = btn.getAttribute('data-copy-label') || 'النص';
-      
-      navigator.clipboard.writeText(text).then(() => {
-        showToast(`تم نسخ ${label} بنجاح: ${text}`);
-      }).catch(() => {
-        // Fallback
-        const input = document.createElement('input');
-        input.value = text;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        showToast(`تم نسخ ${label} بنجاح!`);
-      });
+      const courseName = btn.getAttribute('data-select-course');
+      const targetPurpose = btn.getAttribute('data-purpose') || 'دورة تدريبية';
+
+      activateTab('contact');
+
+      // Set purpose
+      const purposeSelect = document.getElementById('form-purpose');
+      if (purposeSelect) {
+        purposeSelect.value = targetPurpose;
+      }
+
+      // Prepopulate message
+      const msgArea = document.getElementById('form-details');
+      if (msgArea) {
+        msgArea.value = `أرغب في الاستفسار والتسجيل بخصوص: ${courseName}`;
+        msgArea.focus();
+      }
+
+      // Scroll to form smoothly
+      const formEl = document.getElementById('contact-form-card');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     });
   });
 }
 
 /* ===================================================================
-   5. Modals Management (QR Code & Quick Share)
+   5. Frictionless Message Dispatch (WhatsApp & Email)
 =================================================================== */
-function initModals() {
-  const qrTrigger = document.getElementById('qr-trigger');
-  const qrModal = document.getElementById('qr-modal');
-  const modalCloses = document.querySelectorAll('.modal-close, .modal-overlay');
+window.sendViaWhatsApp = function(event) {
+  if (event) event.preventDefault();
 
-  if (qrTrigger && qrModal) {
-    qrTrigger.addEventListener('click', () => {
-      // Dynamic QR Code generation using QuickChart QR API
-      const qrImg = document.getElementById('qr-image');
-      const currentUrl = window.location.href;
-      if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentUrl)}&margin=10`;
-      }
-      qrModal.classList.add('active');
-    });
+  const name = document.getElementById('form-name').value.trim();
+  const phone = document.getElementById('form-phone').value.trim();
+  const purpose = document.getElementById('form-purpose').value;
+  const details = document.getElementById('form-details').value.trim();
+
+  if (!name || !phone) {
+    showToast('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    document.getElementById('form-name').focus();
+    return;
   }
 
-  modalCloses.forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target === el || el.classList.contains('modal-close')) {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-      }
-    });
-  });
+  const messageText = 
+`السلام عليكم أستاذ عبدالرزاق،
+أنا: ${name}
+رقم الهاتف: ${phone}
+نوع الطلب: ${purpose}
+------------------------
+تفاصيل الرسالة:
+${details || 'أود الاستفسار والتواصل معكم مباشرة بخصوص التكوين/الشراكة.'}`;
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-    }
-  });
-}
+  const encoded = encodeURIComponent(messageText);
+  const waUrl = `https://wa.me/213796593630?text=${encoded}`;
+  
+  showToast('جاري فتح واتساب لإرسال رسالتك...');
+  window.open(waUrl, '_blank');
+};
+
+window.sendViaEmail = function(event) {
+  if (event) event.preventDefault();
+
+  const name = document.getElementById('form-name').value.trim();
+  const phone = document.getElementById('form-phone').value.trim();
+  const purpose = document.getElementById('form-purpose').value;
+  const details = document.getElementById('form-details').value.trim();
+
+  if (!name || !phone) {
+    showToast('يرجى ملء الاسم الكامل ورقم الهاتف أولاً');
+    document.getElementById('form-name').focus();
+    return;
+  }
+
+  const subject = encodeURIComponent(`[طلب موقع Portfolio]: ${purpose} - ${name}`);
+  const body = encodeURIComponent(
+`الاسم الكامل: ${name}
+رقم الهاتف: ${phone}
+نوع الطلب: ${purpose}
+
+تفاصيل الطلب:
+${details}
+`
+  );
+
+  const mailUrl = `mailto:profinfo101@gmail.com?subject=${subject}&body=${body}`;
+  showToast('جاري فتح البريد الإلكتروني...');
+  window.location.href = mailUrl;
+};
 
 /* ===================================================================
-   6. Toast Notification System
+   6. Toast Notification
 =================================================================== */
-let toastTimeout;
-function showToast(message) {
-  let toast = document.getElementById('toast');
+let toastTimer;
+function showToast(text) {
+  let toast = document.getElementById('portfolio-toast');
   if (!toast) {
     toast = document.createElement('div');
-    toast.id = 'toast';
-    toast.className = 'toast';
+    toast.id = 'portfolio-toast';
+    toast.className = 'toast-msg';
     document.body.appendChild(toast);
   }
 
-  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--accent-primary)"></i> <span>${message}</span>`;
+  toast.innerHTML = `<i class="fas fa-check-circle" style="color: var(--cyan-neon);"></i> <span>${text}</span>`;
   toast.classList.add('show');
 
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
     toast.classList.remove('show');
-  }, 3200);
+  }, 3500);
 }
-
-/* ===================================================================
-   7. CV Print / Export PDF Handler
-=================================================================== */
-window.printCV = function() {
-  // Ensure all tabs are visible in print mode
-  window.print();
-};
-
